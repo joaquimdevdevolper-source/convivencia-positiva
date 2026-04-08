@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel Admin - Convivência Positiva</title>
+<style>
+  body { font-family:'Segoe UI', sans-serif; background: #f0f2f5; color:#333; margin:0; padding:0; }
+  h1 { text-align:center; margin-top:20px; }
+  table { width:90%; margin:20px auto; border-collapse: collapse; background:#fff; box-shadow:0 0 10px rgba(0,0,0,0.1); }
+  th, td { padding:10px; border-bottom:1px solid #ddd; text-align:center; }
+  th { background:#6a11cb; color:#fff; }
+  button { padding:5px 10px; border:none; border-radius:5px; background:#ff4d4d; color:#fff; cursor:pointer; transition:0.3s; }
+  button:hover { background:#e60000; }
+  .login-admin { width:300px; margin:50px auto; padding:30px; background: rgba(255,255,255,0.9); border-radius:10px; text-align:center; }
+  .login-admin input { width:80%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+  .login-admin button { width:85%; background:#6a11cb; margin-top:10px; }
+  .login-admin button:hover { background:#2575fc; }
+  .message { margin-top:10px; color:red; }
+</style>
+</head>
+<body>
+
+<h1>Painel Admin - Convivência Positiva</h1>
+
+<div class="login-admin" id="loginForm">
+  <input type="text" id="loginAdmin" placeholder="Login admin">
+  <input type="password" id="senhaAdmin" placeholder="Senha admin">
+  <button onclick="loginAdmin()">Entrar</button>
+  <div class="message" id="msgAdmin"></div>
+</div>
+
+<div id="usuariosTable" style="display:none;">
+  <table id="tabelaUsuarios">
+    <thead>
+      <tr>
+        <th>Login</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Turma</th>
+        <th>Matrícula</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<script>
+let adminLogin = '', adminSenha='';
+
+function loginAdmin(){
+  adminLogin = document.getElementById('loginAdmin').value.trim();
+  adminSenha = document.getElementById('senhaAdmin').value.trim();
+  const msg = document.getElementById('msgAdmin');
+  if(!adminLogin || !adminSenha){ msg.innerText="Preencha login e senha!"; return; }
+
+  fetch(`/usuarios?login=${adminLogin}&senha=${adminSenha}`)
+    .then(res=>res.json())
+    .then(data=>{
+      if(data.ok){
+        document.getElementById('loginForm').style.display='none';
+        document.getElementById('usuariosTable').style.display='block';
+        carregarUsuarios(data.usuarios);
+      } else {
+        msg.innerText=data.erro || "Erro ao acessar";
+      }
+    })
+    .catch(()=>{ msg.innerText="Erro no servidor"; });
+}
+
+function carregarUsuarios(usuarios){
+  const tbody = document.querySelector('#tabelaUsuarios tbody');
+  tbody.innerHTML = '';
+  usuarios.forEach(u=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${u.login}</td>
+      <td>${u.nome}</td>
+      <td>${u.idade}</td>
+      <td>${u.turma}</td>
+      <td>${u.matricula}</td>
+      <td><button onclick="removerUsuario('${u.login}')">Remover</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function removerUsuario(login){
+  if(!confirm(`Deseja remover o usuário ${

@@ -8,6 +8,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
 const ARQUIVO_USUARIOS = path.join(__dirname, 'usuarios.json');
+const LOGIN_ADMIN = "admin";
+const SENHA_ADMIN = "123456";
 
 // Função para ler usuários
 function lerUsuarios() {
@@ -33,10 +35,17 @@ function gerarMatricula() {
 app.get('/', (req,res) => res.sendFile(path.join(__dirname,'index.html')));
 app.get('/inicio.html', (req,res) => res.sendFile(path.join(__dirname,'inicio.html')));
 app.get('/cadastro.html', (req,res) => res.sendFile(path.join(__dirname,'cadastro.html')));
+app.get('/userdata.html', (req,res) => res.sendFile(path.join(__dirname,'userdata.html')));
 
-// Login
+// Login de usuários normais
 app.post('/login', (req,res) => {
   const { login, senha } = req.body;
+
+  // Login admin vai direto para userdata
+  if(login === LOGIN_ADMIN && senha === SENHA_ADMIN){
+    return res.send({ ok:true, redirect:'/userdata.html' });
+  }
+
   const usuarios = lerUsuarios();
   const usuario = usuarios.find(u => u.login === login);
 
@@ -46,7 +55,7 @@ app.post('/login', (req,res) => {
   res.send({ ok:true, redirect:'/inicio.html' });
 });
 
-// Cadastro
+// Cadastro de usuário
 app.post('/cadastro', (req,res) => {
   const { nome, idade, turma, login, senha } = req.body;
   const usuarios = lerUsuarios();
@@ -55,11 +64,39 @@ app.post('/cadastro', (req,res) => {
     return res.send({ ok:false, erro:"Login já existe" });
 
   const matricula = gerarMatricula();
-
   usuarios.push({ nome, idade, turma, login, senha, matricula });
   salvarUsuarios(usuarios);
 
   res.send({ ok:true, msg:`Cadastro realizado com sucesso! Sua matrícula é ${matricula}` });
+});
+
+// Rotas para admin visualizar/remover usuários
+// GET: pegar todos usuários
+app.get('/usuarios', (req,res)=>{
+  const { login, senha } = req.query;
+  if(login !== LOGIN_ADMIN || senha !== SENHA_ADMIN){
+    return res.status(403).send({ ok:false, erro:"Acesso negado" });
+  }
+  const usuarios = lerUsuarios();
+  res.send({ ok:true, usuarios });
+});
+
+// DELETE: remover usuário
+app.delete('/usuarios/:login', (req,res)=>{
+  const { login: loginReq, senha } = req.query;
+  const loginRemover = req.params.login;
+
+  if(loginReq !== LOGIN_ADMIN || senha !== SENHA_ADMIN){
+    return res.status(403).send({ ok:false, erro:"Acesso negado" });
+  }
+
+  let usuarios = lerUsuarios();
+  const index = usuarios.findIndex(u => u.login === loginRemover);
+  if(index === -1) return res.send({ ok:false, erro:"Usuário não encontrado" });
+
+  usuarios.splice(index,1);
+  salvarUsuarios(usuarios);
+  res.send({ ok:true, msg:"Usuário removido com sucesso" });
 });
 
 const PORT = process.env.PORT || 3000;
