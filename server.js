@@ -1,27 +1,66 @@
-const express = require("express");
-const path = require("path");
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-const LOGIN_FIXO = "admin";
-const SENHA_FIXA = "123456";
+const ARQUIVO_USUARIOS = path.join(__dirname, 'usuarios.json');
 
-// Primeiro abre o login
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+// Função para ler usuários
+function lerUsuarios() {
+  if (!fs.existsSync(ARQUIVO_USUARIOS)) return [];
+  const data = fs.readFileSync(ARQUIVO_USUARIOS, 'utf-8');
+  return JSON.parse(data);
+}
 
-// Rota de login
-app.post("/login", (req, res) => {
+// Função para salvar usuários
+function salvarUsuarios(usuarios) {
+  fs.writeFileSync(ARQUIVO_USUARIOS, JSON.stringify(usuarios, null, 2));
+}
+
+// Gera matrícula automática
+function gerarMatricula() {
+  const usuarios = lerUsuarios();
+  if (usuarios.length === 0) return "2026001";
+  const ultima = usuarios[usuarios.length-1].matricula;
+  return String(Number(ultima)+1).padStart(7,'0');
+}
+
+// Rotas de páginas
+app.get('/', (req,res) => res.sendFile(path.join(__dirname,'index.html')));
+app.get('/inicio.html', (req,res) => res.sendFile(path.join(__dirname,'inicio.html')));
+app.get('/cadastro.html', (req,res) => res.sendFile(path.join(__dirname,'cadastro.html')));
+
+// Login
+app.post('/login', (req,res) => {
   const { login, senha } = req.body;
-  if (login === LOGIN_FIXO && senha === SENHA_FIXA) {
-    // Redireciona para o index
-    res.send({ ok: true, redirect: "/index.html" });
-  } else {
-    res.send({ ok: false, erro: "Login ou senha incorretos" });
-  }
+  const usuarios = lerUsuarios();
+  const usuario = usuarios.find(u => u.login === login);
+
+  if(!usuario) return res.send({ ok:false, erro:"Usuário não encontrado" });
+  if(usuario.senha !== senha) return res.send({ ok:false, erro:"Senha incorreta" });
+
+  res.send({ ok:true, redirect:'/inicio.html' });
+});
+
+// Cadastro
+app.post('/cadastro', (req,res) => {
+  const { nome, idade, turma, login, senha } = req.body;
+  const usuarios = lerUsuarios();
+
+  if (usuarios.find(u => u.login === login))
+    return res.send({ ok:false, erro:"Login já existe" });
+
+  const matricula = gerarMatricula();
+
+  usuarios.push({ nome, idade, turma, login, senha, matricula });
+  salvarUsuarios(usuarios);
+
+  res.send({ ok:true, msg:`Cadastro realizado com sucesso! Sua matrícula é ${matricula}` });
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
+app.listen(PORT, ()=>console.log(`Servidor rodando na porta ${PORT}`));
