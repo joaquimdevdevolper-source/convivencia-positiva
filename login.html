@@ -1,21 +1,154 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login - Convivência Positiva</title>
-<link rel="stylesheet" href="style.css">
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: blur(8px);
+    background: rgba(0,0,0,0.3);
+    z-index: 0;
+  }
+
+  .login-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px 30px;
+    border-radius: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    width: 320px;
+    text-align: center;
+    color: white;
+  }
+
+  .login-card h1 {
+    font-size: 22px;
+    margin-bottom: 30px;
+    font-weight: 700;
+    text-shadow: 0 0 10px #000;
+  }
+
+  .login-card input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 12px;
+    border: none;
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 16px;
+  }
+
+  .login-card input::placeholder {
+    color: rgba(255,255,255,0.7);
+  }
+
+  .login-card button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg,#ff8a00,#e52e71);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .login-card button:hover {
+    transform: scale(1.05);
+  }
+
+  .login-card .message {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #ff8080;
+  }
+
+  .background-text {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 48px;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.15);
+    white-space: nowrap;
+    pointer-events: none;
+    user-select: none;
+    text-transform: uppercase;
+  }
+
+  @media(max-width: 400px){
+    .login-card { width: 90%; padding: 30px 20px; }
+    .background-text { font-size: 32px; }
+  }
+</style>
 </head>
 <body>
-<div class="container">
-  <h1>Login</h1>
-  <form id="loginForm">
-    <input type="email" placeholder="Email" name="email" required>
-    <input type="password" placeholder="Senha" name="senha" required>
-    <button type="submit">Entrar</button>
-  </form>
-  <p class="link-text">Não tem conta? <a href="/cadastro">Cadastre-se</a></p>
+
+<div class="background-text">Joaquim melhor dev da EEep</div>
+
+<div class="login-card">
+  <h1>Login Convivência</h1>
+  <input type="text" id="login" placeholder="Login">
+  <input type="password" id="senha" placeholder="Senha">
+  <button onclick="fazerLogin()">Entrar</button>
+  <div class="message" id="msg"></div>
 </div>
-<script src="script.js"></script>
+
+<script>
+async function fazerLogin(){
+  const login = document.getElementById('login').value;
+  const senha = document.getElementById('senha').value;
+  const msg = document.getElementById('msg');
+
+  if(!login || !senha){
+    msg.innerText = "Preencha login e senha!";
+    return;
+  }
+
+  try{
+    const res = await fetch('/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({login, senha})
+    });
+    const data = await res.json();
+    if(data.ok){
+      msg.style.color = "#80ff80";
+      msg.innerText = "Login realizado!";
+      setTimeout(()=> window.location.href="/",1000);
+    } else {
+      msg.style.color = "#ff8080";
+      msg.innerText = data.erro || "Erro no login";
+    }
+  } catch(err){
+    msg.style.color = "#ff8080";
+    msg.innerText = "Erro no servidor";
+  }
+}
+</script>
+
 </body>
 </html>
