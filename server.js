@@ -8,7 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Servir arquivos da raiz
+// Serve arquivos da raiz
 app.use(express.static(__dirname));
 
 const pool = new Pool({
@@ -49,8 +49,11 @@ app.get("/usuarios", async (req, res) => {
   res.send(usuarios.rows);
 });
 
-// Servir HTML na raiz
+// Página inicial - login
 app.get("/", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+
+// Página de cadastro
+app.get("/cadastro", (req, res) => res.sendFile(path.join(__dirname, "index.html")));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Servidor rodando na porta ${PORT}`));
