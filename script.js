@@ -9,7 +9,8 @@ if(cadastroForm){
       body:JSON.stringify({email:formData.get("email"),senha:formData.get("senha")})
     });
     const data = await res.json();
-    if(data.ok) alert("Cadastro feito!"); else alert("Erro: "+data.erro);
+    if(data.ok) alert("Cadastro feito com sucesso!");
+    else alert("Erro: "+data.erro);
   });
 }
 
