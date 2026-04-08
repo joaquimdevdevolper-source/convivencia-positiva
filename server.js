@@ -11,16 +11,29 @@ const ARQUIVO_USUARIOS = path.join(__dirname, 'usuarios.json');
 const LOGIN_ADMIN = "admin";
 const SENHA_ADMIN = "123456";
 
-// Função para ler usuários
+// Função para garantir que o arquivo exista e seja JSON válido
 function lerUsuarios() {
-  if (!fs.existsSync(ARQUIVO_USUARIOS)) return [];
-  const data = fs.readFileSync(ARQUIVO_USUARIOS, 'utf-8');
-  return JSON.parse(data);
+  try {
+    if (!fs.existsSync(ARQUIVO_USUARIOS)) {
+      fs.writeFileSync(ARQUIVO_USUARIOS, "[]");
+      return [];
+    }
+    const data = fs.readFileSync(ARQUIVO_USUARIOS, 'utf-8');
+    if(!data) return [];
+    return JSON.parse(data);
+  } catch(e) {
+    console.error("Erro ao ler usuarios.json:", e);
+    return [];
+  }
 }
 
 // Função para salvar usuários
 function salvarUsuarios(usuarios) {
-  fs.writeFileSync(ARQUIVO_USUARIOS, JSON.stringify(usuarios, null, 2));
+  try {
+    fs.writeFileSync(ARQUIVO_USUARIOS, JSON.stringify(usuarios, null, 2));
+  } catch(e) {
+    console.error("Erro ao salvar usuarios.json:", e);
+  }
 }
 
 // Gera matrícula automática
@@ -37,51 +50,44 @@ app.get('/inicio.html', (req,res) => res.sendFile(path.join(__dirname,'inicio.ht
 app.get('/cadastro.html', (req,res) => res.sendFile(path.join(__dirname,'cadastro.html')));
 app.get('/userdata.html', (req,res) => res.sendFile(path.join(__dirname,'userdata.html')));
 
-// Login de usuários normais
+// Login
 app.post('/login', (req,res) => {
   const { login, senha } = req.body;
-
-  // Login admin vai direto para userdata
   if(login === LOGIN_ADMIN && senha === SENHA_ADMIN){
     return res.send({ ok:true, redirect:'/userdata.html' });
   }
 
   const usuarios = lerUsuarios();
   const usuario = usuarios.find(u => u.login === login);
-
   if(!usuario) return res.send({ ok:false, erro:"Usuário não encontrado" });
   if(usuario.senha !== senha) return res.send({ ok:false, erro:"Senha incorreta" });
 
   res.send({ ok:true, redirect:'/inicio.html' });
 });
 
-// Cadastro de usuário
+// Cadastro
 app.post('/cadastro', (req,res) => {
   const { nome, idade, turma, login, senha } = req.body;
   const usuarios = lerUsuarios();
-
   if (usuarios.find(u => u.login === login))
     return res.send({ ok:false, erro:"Login já existe" });
 
   const matricula = gerarMatricula();
   usuarios.push({ nome, idade, turma, login, senha, matricula });
   salvarUsuarios(usuarios);
-
   res.send({ ok:true, msg:`Cadastro realizado com sucesso! Sua matrícula é ${matricula}` });
 });
 
-// Rotas para admin visualizar/remover usuários
-// GET: pegar todos usuários
+// Admin - listar usuários
 app.get('/usuarios', (req,res)=>{
   const { login, senha } = req.query;
   if(login !== LOGIN_ADMIN || senha !== SENHA_ADMIN){
     return res.status(403).send({ ok:false, erro:"Acesso negado" });
   }
-  const usuarios = lerUsuarios();
-  res.send({ ok:true, usuarios });
+  res.send({ ok:true, usuarios: lerUsuarios() });
 });
 
-// DELETE: remover usuário
+// Admin - remover usuário
 app.delete('/usuarios/:login', (req,res)=>{
   const { login: loginReq, senha } = req.query;
   const loginRemover = req.params.login;
