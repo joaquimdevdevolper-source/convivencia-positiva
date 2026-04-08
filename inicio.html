@@ -3,74 +3,85 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Convivência Positiva - Início</title>
+<title>Convivência Positiva</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-  body, html { height: 100%; background: linear-gradient(135deg, #6a11cb, #2575fc); color: #fff; }
-
+  body { 
+    margin:0; 
+    font-family:'Segoe UI', sans-serif; 
+    background: linear-gradient(to bottom right, #6a11cb, #2575fc); 
+    color:#fff; 
+    min-height:100vh; 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+  }
   .background-text {
-    position: fixed; top:50%; left:50%; transform: translate(-50%, -50%);
-    font-size: 4vw; font-weight:bold; color: rgba(255,255,255,0.1); white-space: nowrap; pointer-events: none; z-index:0; text-align:center;
+    font-size:2em;
+    font-weight:bold;
+    margin-top:30px;
+    text-align:center;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
   }
-
-  .container {
-    position: relative; z-index:1; max-width:1200px; margin:0 auto; padding:40px 20px; text-align:center;
-  }
-
-  h1 { font-size:3rem; margin-bottom:20px; text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
-  p { font-size:1.2rem; margin-bottom:40px; color:#e0e0e0; }
-
-  .sections { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; }
-
-  .section-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
+  .card {
+    background: rgba(255,255,255,0.1);
+    padding:20px;
+    margin:20px;
     border-radius:15px;
-    padding:30px 20px;
-    width:250px;
-    transition: transform 0.3s, background 0.3s;
+    width:90%;
+    max-width:700px;
+    text-align:center;
+    backdrop-filter: blur(10px);
+  }
+  h1, h2 { margin:10px 0; }
+  p { line-height:1.5; }
+  ul { text-align:left; }
+  button {
+    padding:10px 20px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#ffcc00;
+    color:#333;
+    font-weight:bold;
     cursor:pointer;
+    transition:0.3s;
   }
-
-  .section-card:hover { transform: translateY(-10px); background: rgba(255, 255, 255, 0.2); }
-
-  .section-card h2 { font-size:1.5rem; margin-bottom:15px; }
-  .section-card p { font-size:1rem; color:#f0f0f0; }
-
-  @media(max-width:768px){
-    .sections { flex-direction: column; align-items:center; }
-    h1 { font-size:2.5rem; }
-    p { font-size:1rem; }
-  }
+  button:hover { background:#ffaa00; }
 </style>
 </head>
 <body>
 
 <div class="background-text">Joaquim o melhor dev</div>
 
-<div class="container">
-  <h1>Convivência Positiva</h1>
-  <p>O site ainda está em desenvolvimento. Em breve mais conteúdos sobre Convivência Escolar Positiva!</p>
-
-  <div class="sections">
-    <div class="section-card" onclick="alert('Seção de Dicas de Convivência')">
-      <h2>Dicas de Convivência</h2>
-      <p>Saiba como melhorar a relação entre alunos e professores.</p>
-    </div>
-    <div class="section-card" onclick="alert('Seção de Atividades')">
-      <h2>Atividades Interativas</h2>
-      <p>Exercícios e jogos que promovem empatia e colaboração.</p>
-    </div>
-    <div class="section-card" onclick="alert('Seção de Notícias')">
-      <h2>Notícias & Eventos</h2>
-      <p>Fique por dentro de eventos e notícias sobre educação positiva.</p>
-    </div>
-    <div class="section-card" onclick="alert('Seção de Recursos')">
-      <h2>Recursos & Materiais</h2>
-      <p>Materiais educativos, guias e vídeos para apoiar a convivência.</p>
-    </div>
-  </div>
+<div class="card">
+  <h1>Bem-vindo ao Convivência Positiva!</h1>
+  <p>Este site está em desenvolvimento e tem como objetivo incentivar uma convivência saudável e positiva na escola. 💡</p>
 </div>
+
+<div class="card">
+  <h2>Dicas de Convivência Escolar Positiva:</h2>
+  <ul>
+    <li>Respeite colegas e professores.</li>
+    <li>Ouça antes de julgar.</li>
+    <li>Colabore em atividades em grupo.</li>
+    <li>Seja gentil, mesmo em conflitos.</li>
+    <li>Ajude quem precisa, sempre que possível.</li>
+  </ul>
+</div>
+
+<div class="card" id="adminSection" style="display:none;">
+  <h2>Painel Admin</h2>
+  <p>Se você é administrador, pode acessar o painel de usuários.</p>
+  <button onclick="window.location.href='userdata.html'">Ir para painel de usuários</button>
+</div>
+
+<script>
+  // Aqui você poderia mostrar o nome do usuário logado se passar via session ou localStorage
+  const usuarioLogado = localStorage.getItem('login'); // exemplo
+  if(usuarioLogado === 'admin'){
+    document.getElementById('adminSection').style.display = 'block';
+  }
+</script>
 
 </body>
 </html>
